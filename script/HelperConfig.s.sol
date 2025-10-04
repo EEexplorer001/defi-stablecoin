@@ -5,8 +5,7 @@ import {Script} from "forge-std/Script.sol";
 import {MockV3Aggregator} from "../test/mocks/MockV3Aggregator.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
 
-
-contract HelperConfig is Script{
+contract HelperConfig is Script {
     struct NetworkConfig {
         address wethUsdPriceFeed;
         address wbtcUsdPriceFeed;
@@ -47,20 +46,14 @@ contract HelperConfig is Script{
 
         // 1. Deploy mocks
         vm.startBroadcast();
-        MockV3Aggregator ethUsdPriceFeed = new MockV3Aggregator(
-            DECIMALS,
-            ETH_USD_PRICE
-        );
+        MockV3Aggregator ethUsdPriceFeed = new MockV3Aggregator(DECIMALS, ETH_USD_PRICE);
         ERC20Mock wethMock = new ERC20Mock("WETH", "WETH", msg.sender, 1000e8);
 
-        MockV3Aggregator btcUsdPriceFeed = new MockV3Aggregator(
-            DECIMALS,
-            BTC_USD_PRICE
-        );
+        MockV3Aggregator btcUsdPriceFeed = new MockV3Aggregator(DECIMALS, BTC_USD_PRICE);
         ERC20Mock wbtcMock = new ERC20Mock("WBTC", "WBTC", msg.sender, 1000e8);
         vm.stopBroadcast();
         // 2. Return mock addresses
-        
+
         return NetworkConfig({
             wethUsdPriceFeed: address(ethUsdPriceFeed),
             wbtcUsdPriceFeed: address(btcUsdPriceFeed),

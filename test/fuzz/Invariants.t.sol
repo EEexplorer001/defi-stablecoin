@@ -23,16 +23,16 @@ contract Invariants is StdInvariant, Test {
     address wbtc;
     Handler handler;
 
-    function setUp() external{
+    function setUp() external {
         deployer = new DeployDSC();
-        (dsc, dsce, config) = deployer.run();   
+        (dsc, dsce, config) = deployer.run();
         (,, weth, wbtc,) = config.activeNetworkConfig();
         // targetContract(address(dsce));
         handler = new Handler(dsce, dsc);
         targetContract(address(handler));
     }
 
-    function invariant_protocolMustHaveMoreValueThanTotalSupply() public view{
+    function invariant_protocolMustHaveMoreValueThanTotalSupply() public view {
         uint256 totalSupply = dsc.totalSupply();
         uint256 totalWethDeposited = IERC20(weth).balanceOf(address(dsce));
         uint256 totalWbtcDeposited = IERC20(wbtc).balanceOf(address(dsce));
@@ -47,7 +47,7 @@ contract Invariants is StdInvariant, Test {
         assert(wethValue + wbtcValue >= totalSupply);
     }
 
-    function invariant_gettersShouldNotRevert() public view{
+    function invariant_gettersShouldNotRevert() public view {
         dsce.getAdditionalFeedPrecision();
         dsce.getCollateralTokens();
         dsce.getLiquidationBonus();

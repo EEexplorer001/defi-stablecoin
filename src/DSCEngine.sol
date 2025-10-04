@@ -80,7 +80,7 @@ contract DSCEngine is ReentrancyGuard {
     mapping(address user => uint256 amountDscMinted) private s_dscMinted; // user address -> amount of DSC minted
 
     address[] private s_collateralTokens;
-    
+
     DecentralizedStableCoin private immutable i_dsc;
 
     //////////////////
@@ -133,8 +133,8 @@ contract DSCEngine is ReentrancyGuard {
      * @param amountDscToMint The amount of DSC to mint
      */
     function depositCollateralAndMintDsc(
-        address tokenCollateralAddress, 
-        uint256 amountCollateral, 
+        address tokenCollateralAddress,
+        uint256 amountCollateral,
         uint256 amountDscToMint
     ) external {
         depositCollateral(tokenCollateralAddress, amountCollateral);
@@ -167,11 +167,8 @@ contract DSCEngine is ReentrancyGuard {
      * @param amountDscToBurn The amount of DSC to burn
      * @dev You must have more than 200% collateralization after this transaction
      */
-    function redeemCollateralForDsc(
-        address tokenCollateralAddress, 
-        uint256 amountCollateral, 
-        uint256 amountDscToBurn) 
-        external 
+    function redeemCollateralForDsc(address tokenCollateralAddress, uint256 amountCollateral, uint256 amountDscToBurn)
+        external
     {
         burnDsc(amountDscToBurn);
         redeemCollateral(tokenCollateralAddress, amountCollateral);
@@ -179,7 +176,7 @@ contract DSCEngine is ReentrancyGuard {
     }
 
     // health factor must be over 1 AFTER collateral pulled
-    function redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral) 
+    function redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral)
         public
         moreThanZero(amountCollateral)
         nonReentrant
@@ -211,19 +208,19 @@ contract DSCEngine is ReentrancyGuard {
     // $75 backing $50 DSC
     // Liquidator take $75 backing and burns off $50 DSC
 
-    /** 
-    * @param collateral The address of the collateral to liquidate
-    * @param user The user to liquidate. The user who has broken the health factor.
-    * @param debtToCover The amount of DSC you want to burn to improve the user's health factor
-    * @notice You can partially liquidate a user.
-    * @notice You will get a liquidation bonus for taking the user's funds
-    * @notice This function working assumes the protocol will be roughly 200% overcollateralized in order for this to work.
-    * @notice a known bug would be if the protocol were 100% or less collateralized, then we wouldn't be able to incentivise liquidators.
-    * For example, if the price of the collateral plummeted before anyone could be liquidated.
-    */
-    function liquidate(address collateral, address user, uint256 debtToCover) 
-        external 
-        moreThanZero(debtToCover) 
+    /**
+     * @param collateral The address of the collateral to liquidate
+     * @param user The user to liquidate. The user who has broken the health factor.
+     * @param debtToCover The amount of DSC you want to burn to improve the user's health factor
+     * @notice You can partially liquidate a user.
+     * @notice You will get a liquidation bonus for taking the user's funds
+     * @notice This function working assumes the protocol will be roughly 200% overcollateralized in order for this to work.
+     * @notice a known bug would be if the protocol were 100% or less collateralized, then we wouldn't be able to incentivise liquidators.
+     * For example, if the price of the collateral plummeted before anyone could be liquidated.
+     */
+    function liquidate(address collateral, address user, uint256 debtToCover)
+        external
+        moreThanZero(debtToCover)
         nonReentrant
     {
         // check health factor of user
@@ -253,11 +250,11 @@ contract DSCEngine is ReentrancyGuard {
 
     //////////////////////////////////
     // Internal & Private View Functions //
-    ////////////////////////////////////// 
+    //////////////////////////////////////
 
-    /** 
-    * @dev Low-level internal function. Do not call unless the function calling it is checking for health factor being broken.
-    */
+    /**
+     * @dev Low-level internal function. Do not call unless the function calling it is checking for health factor being broken.
+     */
     function _burnDsc(uint256 amountDscToBurn, address onBehalfOf, address dscFrom) private {
         s_dscMinted[onBehalfOf] -= amountDscToBurn;
         bool success = i_dsc.transferFrom(dscFrom, address(this), amountDscToBurn);
@@ -267,10 +264,7 @@ contract DSCEngine is ReentrancyGuard {
         i_dsc.burn(amountDscToBurn);
     }
 
-    function _calculateHealthFactor(
-        uint256 totalDscMinted,
-        uint256 collateralValueInUsd
-    )
+    function _calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
         internal
         pure
         returns (uint256)
@@ -280,7 +274,9 @@ contract DSCEngine is ReentrancyGuard {
         return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
     }
 
-    function _redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral, address from, address to) private {
+    function _redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral, address from, address to)
+        private
+    {
         s_collateralDeposited[from][tokenCollateralAddress] -= amountCollateral;
         emit CollateralRedeemed(from, to, tokenCollateralAddress, amountCollateral);
         bool success = IERC20(tokenCollateralAddress).transfer(to, amountCollateral);
@@ -289,7 +285,11 @@ contract DSCEngine is ReentrancyGuard {
         }
     }
 
-    function _getAccountInformation(address user) private view returns (uint256 totalDscMinted, uint256 collateralValueInUsd) {
+    function _getAccountInformation(address user)
+        private
+        view
+        returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
+    {
         totalDscMinted = s_dscMinted[user];
         collateralValueInUsd = getAccountCollateralValue(user);
     }
@@ -297,10 +297,11 @@ contract DSCEngine is ReentrancyGuard {
     * Returns how close to liquidation a user is
     * If a user goes below 1, they can be liquidated
     */
+
     function _healthFactor(address user) private view returns (uint256) {
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
         return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
-    } 
+    }
 
     function _revertIfHealthFactorIsBroken(address user) internal view {
         uint256 userHealthFactor = _healthFactor(user);
@@ -313,10 +314,7 @@ contract DSCEngine is ReentrancyGuard {
     //////////////////////////////////
     // External & Public View Functions //
     //////////////////////////////////
-    function calculateHealthFactor(
-        uint256 totalDscMinted,
-        uint256 collateralValueInUsd
-    )
+    function calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
         external
         pure
         returns (uint256)
@@ -328,10 +326,9 @@ contract DSCEngine is ReentrancyGuard {
         return s_collateralDeposited[user][token];
     }
 
-
     function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
-        (, int256 price, , , ) = priceFeed.staleCheckLatestRoundData();
+        (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
         // price returned in 8 decimals, we need to convert it to 18 decimals
         // the amount is in the token's native decimals (usually 18)
         return (usdAmountInWei * PRECISION) / (uint256(price) * ADDITIONAL_FEED_PRECISION);
@@ -349,13 +346,17 @@ contract DSCEngine is ReentrancyGuard {
 
     function getUsdValue(address token, uint256 amount) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
-        (, int256 price, , , ) = priceFeed.staleCheckLatestRoundData();
+        (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
         // price returned in 8 decimals, we need to convert it to 18 decimals
         // the amount is in the token's native decimals (usually 18)
         return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * amount) / PRECISION;
     }
 
-    function getAccountInformation(address user) external view returns (uint256 totalDscMinted, uint256 collateralValueInUsd) {
+    function getAccountInformation(address user)
+        external
+        view
+        returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
+    {
         return _getAccountInformation(user);
     }
 

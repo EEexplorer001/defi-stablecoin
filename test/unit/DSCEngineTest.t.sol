@@ -2,19 +2,19 @@
 
 pragma solidity 0.8.20;
 
-import { DeployDSC } from "../../script/DeployDSC.s.sol";
-import { DSCEngine } from "../../src/DSCEngine.sol";
-import { DecentralizedStableCoin } from "../../src/DecentralizedStableCoin.sol";
-import { HelperConfig } from "../../script/HelperConfig.s.sol";
+import {DeployDSC} from "../../script/DeployDSC.s.sol";
+import {DSCEngine} from "../../src/DSCEngine.sol";
+import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
+import {HelperConfig} from "../../script/HelperConfig.s.sol";
 // import { ERC20Mock } from "@openzeppelin/contracts/mocks/ERC20Mock.sol"; Updated mock location
-import { ERC20Mock } from "../mocks/ERC20Mock.sol";
-import { MockV3Aggregator } from "../mocks/MockV3Aggregator.sol";
-import { MockMoreDebtDSC } from "../mocks/MockMoreDebtDSC.sol";
-import { MockFailedMintDSC } from "../mocks/MockFailedMintDSC.sol";
-import { MockFailedTransferFrom } from "../mocks/MockFailedTransferFrom.sol";
-import { MockFailedTransfer } from "../mocks/MockFailedTransfer.sol";
-import { Test, console } from "forge-std/Test.sol";
-import { StdCheats } from "forge-std/StdCheats.sol";
+import {ERC20Mock} from "../mocks/ERC20Mock.sol";
+import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
+import {MockMoreDebtDSC} from "../mocks/MockMoreDebtDSC.sol";
+import {MockFailedMintDSC} from "../mocks/MockFailedMintDSC.sol";
+import {MockFailedTransferFrom} from "../mocks/MockFailedTransferFrom.sol";
+import {MockFailedTransfer} from "../mocks/MockFailedTransfer.sol";
+import {Test, console} from "forge-std/Test.sol";
+import {StdCheats} from "forge-std/StdCheats.sol";
 
 contract DSCEngineTest is StdCheats, Test {
     event CollateralRedeemed(address indexed redeemFrom, address indexed redeemTo, address token, uint256 amount); // if
@@ -85,14 +85,14 @@ contract DSCEngineTest is StdCheats, Test {
     // Price Tests //
     //////////////////
 
-    function testGetTokenAmountFromUsd() public view{
+    function testGetTokenAmountFromUsd() public view {
         // If we want $100 of WETH @ $2000/WETH, that would be 0.05 WETH
         uint256 expectedWeth = 0.05 ether;
         uint256 amountWeth = dsce.getTokenAmountFromUsd(weth, 100 ether);
         assertEq(amountWeth, expectedWeth);
     }
 
-    function testGetUsdValue() public view{
+    function testGetUsdValue() public view {
         uint256 ethAmount = 15e18;
         // 15e18 ETH * $2000/ETH = $30,000e18
         uint256 expectedUsd = 30_000e18;
@@ -466,7 +466,7 @@ contract DSCEngineTest is StdCheats, Test {
         uint256 expectedUserCollateralValueInUsd = dsce.getUsdValue(weth, amountCollateral) - (usdAmountLiquidated); //10 * 18 - 110 = $70
 
         (, uint256 userCollateralValueInUsd) = dsce.getAccountInformation(user);
-        uint256 hardCodedExpectedValue = 70_000_000_000_000_000_020; // 
+        uint256 hardCodedExpectedValue = 70_000_000_000_000_000_020; //
         assertEq(userCollateralValueInUsd, expectedUserCollateralValueInUsd);
         assertEq(userCollateralValueInUsd, hardCodedExpectedValue);
     }
@@ -484,22 +484,22 @@ contract DSCEngineTest is StdCheats, Test {
     ///////////////////////////////////
     // View & Pure Function Tests //
     //////////////////////////////////
-    function testGetCollateralTokenPriceFeed() public view{
+    function testGetCollateralTokenPriceFeed() public view {
         address priceFeed = dsce.getCollateralTokenPriceFeed(weth);
         assertEq(priceFeed, ethUsdPriceFeed);
     }
 
-    function testGetCollateralTokens() public view{
+    function testGetCollateralTokens() public view {
         address[] memory collateralTokens = dsce.getCollateralTokens();
         assertEq(collateralTokens[0], weth);
     }
 
-    function testGetMinHealthFactor() public view{
+    function testGetMinHealthFactor() public view {
         uint256 minHealthFactor = dsce.getMinHealthFactor();
         assertEq(minHealthFactor, MIN_HEALTH_FACTOR);
     }
 
-    function testGetLiquidationThreshold() public view{
+    function testGetLiquidationThreshold() public view {
         uint256 liquidationThreshold = dsce.getLiquidationThreshold();
         assertEq(liquidationThreshold, LIQUIDATION_THRESHOLD);
     }
@@ -529,12 +529,12 @@ contract DSCEngineTest is StdCheats, Test {
         assertEq(collateralValue, expectedCollateralValue);
     }
 
-    function testGetDsc() public view{
+    function testGetDsc() public view {
         address dscAddress = dsce.getDsc();
         assertEq(dscAddress, address(dsc));
     }
 
-    function testLiquidationPrecision() public view{
+    function testLiquidationPrecision() public view {
         uint256 expectedLiquidationPrecision = 100;
         uint256 actualLiquidationPrecision = dsce.getLiquidationPrecision();
         assertEq(actualLiquidationPrecision, expectedLiquidationPrecision);
